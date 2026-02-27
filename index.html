@@ -2,183 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Project | Secure Portal</title>
+    <title>Team Project Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; overflow: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .dropdown { display: none; position: absolute; right: 0; top: 100%; z-index: 999; width: 180px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        /* FIXED: Dropdown Menu Z-Index and Position */
+        .dropdown { display: none; position: fixed; z-index: 9999; width: 160px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .dropdown.active { display: block; }
-        .toast { transform: translateY(100px); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .toast { transform: translateY(100px); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 10000; }
         .toast.show { transform: translateY(0); }
-        #auth-screen { z-index: 2000; background: #020617; }
-        .file-row { cursor: pointer; transition: 0.2s; z-index: 10; position: relative; }
-        .file-row:hover { background: rgba(255, 255, 255, 0.05); }
     </style>
 </head>
 <body>
 
-    <!-- 1. LOGIN SCREEN -->
-    <div id="auth-screen" class="fixed inset-0 flex items-center justify-center p-6">
+    <!-- LOGIN -->
+    <div id="auth" class="fixed inset-0 flex items-center justify-center z-[10000] bg-[#020617] p-6">
         <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black italic mb-2 uppercase tracking-tighter">TEAM <span class="text-blue-500">PROJECT</span></h1>
-            <p class="text-gray-500 text-sm mb-8 font-semibold uppercase tracking-widest">Authorized Access Only</p>
-            <input type="password" id="passInput" placeholder="Enter Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center focus:outline-none focus:border-blue-500 transition">
-            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold hover:bg-blue-500 transition shadow-lg shadow-blue-500/20">Enter Workspace</button>
+            <h1 class="text-3xl font-black italic mb-6 uppercase tracking-tighter">Team <span class="text-blue-500">Project</span></h1>
+            <input type="password" id="pw" placeholder="Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center focus:border-blue-500 outline-none">
+            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold hover:bg-blue-500">Enter Vault</button>
         </div>
     </div>
 
-    <!-- 2. MAIN DASHBOARD (HIDDEN BY DEFAULT) -->
-    <div id="dashboard" class="hidden h-screen flex flex-col p-6 md:p-12 overflow-y-auto">
+    <!-- MAIN APP -->
+    <div id="app" class="hidden h-screen flex flex-col p-6 md:p-12 overflow-y-auto">
         <nav class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-black italic uppercase">Team <span class="text-blue-500">Project</span></h1>
-            <div class="flex gap-4">
-                <button onclick="logout()" class="text-gray-500 hover:text-white text-sm font-bold">Logout</button>
-                <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">+ Upload</button>
-            </div>
+            <h1 class="text-2xl font-black italic uppercase italic">TEAM <span class="text-blue-500">PROJECT</span></h1>
+            <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">+ Upload</button>
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glass rounded-[2rem] p-8">
-                <h2 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Vault Explorer (Double-Click to View)</h2>
-                <div id="fileList" class="space-y-3">
-                    <!-- Files injected here -->
-                </div>
+            <div class="lg:col-span-2 glass rounded-[2rem] p-8 overflow-visible">
+                <h2 class="text-gray-500 text-xs font-bold uppercase mb-6 tracking-widest">Double-Click to View</h2>
+                <div id="fileList" class="space-y-3"></div>
             </div>
             <div class="glass rounded-[2rem] p-8 h-fit">
-                <h3 class="font-bold mb-4">Workspace Info</h3>
-                <p class="text-sm text-gray-400">PDF/Images will open in browser. PPTX/Docs will open via Office Viewer. Modify automatically updates identical filenames.</p>
+                <h3 class="font-bold mb-4">Workspace Tips</h3>
+                <p class="text-sm text-gray-400">1. PDFs/Images open in new tabs.<br>2. PPTX/DOCX open via Office Online Viewer.<br>3. Modify replaces old files with the same name.</p>
             </div>
         </div>
     </div>
 
-    <!-- 3. MODAL -->
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[3000] flex items-center justify-center p-4 backdrop-blur-md">
+    <!-- MODAL -->
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[5000] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] relative">
             <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-lucide="x"></i></button>
-            <h2 id="mTitle" class="text-2xl font-bold mb-6">Upload Resource</h2>
-            <input type="file" id="fi" class="block w-full text-sm text-gray-400 file:bg-blue-600 file:text-white file:px-6 file:py-2.5 file:rounded-xl file:border-0 mb-8">
-            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-tighter hover:bg-blue-400 transition">Push to Cloud</button>
+            <h2 id="mTitle" class="text-xl font-bold mb-6">Upload Resource</h2>
+            <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl file:border-0">
+            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest">Push to GitHub</button>
         </div>
     </div>
 
-    <!-- 4. TOAST NOTIFICATIONS -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-2xl flex items-center gap-4 z-[5000] toast">
-        <div id="toastIcon"></div>
-        <p id="toastMsg" class="font-bold text-sm"></p>
+    <!-- TOAST POPUP -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-2xl flex items-center gap-4 toast">
+        <div id="tIcon"></div><p id="tMsg" class="font-bold text-sm"></p>
     </div>
 
     <script>
         lucide.createIcons();
-        const PASS = "1234"; // SET YOUR PASSWORD HERE
-        let filesData = [];
+        const PASS = "1234"; // PASSWORD
 
-        // --- AUTH LOGIC ---
         function login() {
-            if(document.getElementById('passInput').value === PASS) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('dashboard').classList.remove('hidden');
+            if(document.getElementById('pw').value === PASS) {
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('app').classList.remove('hidden');
                 fetchFiles();
-            } else { notify("Access Denied: Incorrect Password", "error"); }
+            } else { showToast("Wrong Password!", "error"); }
         }
-        function logout() { location.reload(); }
 
-        // --- NOTIFICATION LOGIC ---
-        function notify(msg, type) {
+        function showToast(msg, type) {
             const t = document.getElementById('toast');
-            const m = document.getElementById('toastMsg');
-            const i = document.getElementById('toastIcon');
-            m.innerText = msg;
-            i.innerHTML = type === 'success' ? '<i data-lucide="check-circle" class="text-green-400"></i>' : '<i data-lucide="alert-circle" class="text-red-400"></i>';
+            document.getElementById('tMsg').innerText = msg;
+            document.getElementById('tIcon').innerHTML = type === 'success' ? '<i data-lucide="check" class="text-green-400"></i>' : '<i data-lucide="x" class="text-red-400"></i>';
             lucide.createIcons();
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // --- FILE ACTIONS ---
         async function fetchFiles() {
             try {
-                const r = await fetch('/api/manage');
-                filesData = await r.json();
+                const res = await fetch('/api/manage');
+                const files = await res.json();
                 const list = document.getElementById('fileList');
                 list.innerHTML = '';
-                filesData.forEach((f, i) => {
+                files.forEach((f, i) => {
                     if(f.name === '.gitkeep') return;
                     const div = document.createElement('div');
-                    div.className = "file-row flex justify-between items-center p-5 glass rounded-2xl border border-white/5 overflow-visible";
+                    div.className = "flex justify-between items-center p-5 glass rounded-2xl hover:bg-white/5 cursor-pointer";
                     
-                    // Double Click to View Logic
+                    // FIXED: DOUBLE CLICK VIEW LOGIC
                     div.ondblclick = () => {
-                        const url = f.name.endsWith('.pptx') || f.name.endsWith('.docx') 
-                            ? `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(f.download_url)}`
-                            : f.download_url;
+                        const isOffice = f.name.match(/\.(pptx|docx|xlsx|ppt|doc)$/i);
+                        const url = isOffice ? `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(f.download_url)}` : f.download_url;
                         window.open(url, '_blank');
                     };
 
                     div.innerHTML = `
                         <div class="flex items-center gap-4">
-                            <i data-lucide="file-text" class="text-blue-400"></i>
-                            <span class="text-sm font-semibold">${f.name}</span>
+                            <i data-lucide="file" class="text-blue-400"></i>
+                            <span class="text-sm font-bold">${f.name}</span>
                         </div>
-                        <div class="relative overflow-visible">
-                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="more-vertical"></i></button>
-                            <div id="menu-${i}" class="dropdown glass p-2 rounded-xl border border-white/20">
-                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-blue-500/20 rounded-lg flex gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
-                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs hover:bg-yellow-500/20 rounded-lg flex gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
-                                <button onclick="deleteAction('${f.name}', '${f.sha}')" class="w-full text-left p-2 text-xs hover:bg-red-500/20 text-red-400 rounded-lg flex gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
+                        <div class="relative">
+                            <button onclick="toggleMenu(event, this, ${i})" class="p-2"><i data-lucide="more-vertical"></i></button>
+                            <div id="menu-${i}" class="dropdown glass p-2">
+                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
+                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="edit" class="w-3"></i> Modify</button>
+                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs hover:bg-red-500/10 text-red-400 rounded flex gap-2"><i data-lucide="trash" class="w-3"></i> Delete</button>
                             </div>
                         </div>`;
                     list.appendChild(div);
                 });
                 lucide.createIcons();
-            } catch (e) { notify("Sync Failed: Check API", "error"); }
+            } catch (e) { showToast("Sync Error", "error"); }
         }
 
-        function toggleMenu(e, id) {
+        // FIXED: Dropdown Positioning
+        function toggleMenu(e, btn, id) {
             e.stopPropagation();
+            const menu = document.getElementById(`menu-${id}`);
+            const rect = btn.getBoundingClientRect();
+            menu.style.top = `${rect.bottom + 10}px`;
+            menu.style.left = `${rect.left - 130}px`;
             document.querySelectorAll('.dropdown').forEach(m => m.id !== `menu-${id}` && m.classList.remove('active'));
-            document.getElementById(`menu-${id}`).classList.toggle('active');
+            menu.classList.toggle('active');
         }
 
         window.onclick = () => document.querySelectorAll('.dropdown').forEach(m => m.classList.remove('active'));
 
         function openModal(mode) { 
-            document.getElementById('mTitle').innerText = mode === 'Modify' ? 'Modify Resource' : 'Upload Resource';
+            document.getElementById('mTitle').innerText = mode === 'Modify' ? 'Modify File' : 'Upload File';
             document.getElementById('modal').classList.remove('hidden'); 
         }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
         document.getElementById('ub').onclick = async () => {
-            const file = document.getElementById('fi').files[0];
-            if (!file) return notify("Please select a file", "error");
-            const btn = document.getElementById('ub');
-            btn.innerText = "Processing..."; btn.disabled = true;
-
+            const f = document.getElementById('fi').files[0];
+            if (!f) return showToast("Select a file", "error");
+            document.getElementById('ub').innerText = "Pushing...";
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const content = e.target.result.split(',')[1];
                 const res = await fetch('/api/manage', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ fileName: file.name, content })
+                    body: JSON.stringify({ fileName: f.name, content })
                 });
-                if (res.ok) { notify("File Synced Successfully", "success"); setTimeout(() => location.reload(), 1500); } 
-                else { 
-                    const err = await res.json();
-                    notify(`Upload Error: ${err.message || 'Check Token'}`, "error");
-                    btn.innerText = "Push to Cloud"; btn.disabled = false;
-                }
+                if (res.ok) { showToast("Success!", "success"); setTimeout(()=>location.reload(), 1000); }
+                else { const d = await res.json(); showToast(d.message || "Fail", "error"); document.getElementById('ub').innerText = "Push to GitHub"; }
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(f);
         };
 
-        async function deleteAction(name, sha) {
-            if (!confirm(`Permanently delete ${name}?`)) return;
-            const res = await fetch(`/api/manage?file=${name}&sha=${sha}`, { method: 'DELETE' });
-            if (res.ok) { notify("Deleted Successfully", "success"); fetchFiles(); } 
-            else { notify("Error: Could not delete from GitHub", "error"); }
+        async function del(n, s) {
+            if(!confirm(`Delete ${n}?`)) return;
+            const res = await fetch(`/api/manage?file=${n}&sha=${s}`, { method: 'DELETE' });
+            if(res.ok) { showToast("Deleted", "success"); fetchFiles(); } else showToast("Delete failed", "error");
         }
     </script>
 </body>
