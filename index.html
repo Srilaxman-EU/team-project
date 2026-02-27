@@ -3,95 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mani Team | CauseRuDi Portal</title>
+    <title>Mani Team | CauseRuDi Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #050505; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .gradient-btn { background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); transition: 0.3s; }
-        .gradient-btn:hover { opacity: 0.8; transform: scale(1.05); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glow { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%); filter: blur(60px); z-index: -1; }
+        .gradient-text { background: linear-gradient(135deg, #60a5fa 0%, #2dd4bf 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body class="p-8">
-    <!-- Header -->
-    <nav class="flex justify-between items-center mb-12">
-        <h1 class="text-3xl font-black italic uppercase">Mani <span class="text-blue-400">Team</span></h1>
-        <button onclick="toggleModal()" class="gradient-btn px-6 py-2 rounded-full font-bold text-black flex items-center gap-2">
-            <i data-lucide="upload-cloud"></i> Upload File
+<body class="p-6 md:p-16 min-h-screen relative">
+    <div class="glow top-10 left-10"></div>
+    <div class="glow bottom-10 right-10"></div>
+
+    <nav class="flex justify-between items-center mb-16">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter italic italic">MANI <span class="gradient-text">TEAM</span></h1>
+            <p class="text-[10px] tracking-[0.3em] text-gray-500 font-bold uppercase">CauseRuDi Project Portal</p>
+        </div>
+        <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-2xl font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/20">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i> Add File
         </button>
     </nav>
 
-    <!-- Dashboard Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="md:col-span-2 glass p-8 rounded-3xl">
-            <h2 class="text-xl font-bold mb-4">Project Resources</h2>
-            <div class="space-y-4">
-                <a href="files/paper.pdf" class="flex justify-between items-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition">
-                    <div class="flex items-center gap-4"><i data-lucide="file-text" class="text-blue-400"></i> IEEE Paper</div>
-                    <i data-lucide="download"></i>
-                </a>
-                <a href="files/presentation.pptx" class="flex justify-between items-center p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition">
-                    <div class="flex items-center gap-4"><i data-lucide="presentation" class="text-purple-400"></i> Project PPT</div>
-                    <i data-lucide="download"></i>
-                </a>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- File Explorer -->
+        <div class="lg:col-span-2 glass rounded-[2.5rem] p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold flex items-center gap-3"><i data-lucide="folder-git-2" class="text-blue-400"></i> Project Files</h2>
+                <button onclick="fetchFiles()" class="text-gray-400 hover:text-white transition"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+            </div>
+            <div id="fileList" class="grid gap-4">
+                <!-- Dynamic Content -->
+                <p class="text-gray-500 animate-pulse">Initializing vault...</p>
             </div>
         </div>
-        
-        <div class="glass p-8 rounded-3xl flex flex-col items-center justify-center text-center">
-            <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4"><i data-lucide="users" class="text-blue-400"></i></div>
-            <h3 class="font-bold">Team Mani</h3>
-            <p class="text-gray-500 text-sm">Active Collaborators: 5</p>
+
+        <!-- Sidebar / Stats -->
+        <div class="space-y-6">
+            <div class="glass rounded-[2.5rem] p-8">
+                <h3 class="text-sm font-bold text-gray-500 mb-6 tracking-widest uppercase">System Status</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center"><span class="text-gray-400">Vercel Backend</span> <span class="text-green-400 text-xs font-bold px-2 py-1 bg-green-400/10 rounded-md">ONLINE</span></div>
+                    <div class="flex justify-between items-center"><span class="text-gray-400">GitHub Sync</span> <span class="text-blue-400 text-xs font-bold px-2 py-1 bg-blue-400/10 rounded-md">ACTIVE</span></div>
+                </div>
+            </div>
+            <div class="bg-gradient-to-br from-blue-600/20 to-teal-500/20 rounded-[2.5rem] p-8 border border-white/5">
+                <p class="text-sm leading-relaxed text-blue-100">Duplicate files are automatically <b>updated</b>. Deleting a file is permanent and reflects instantly in GitHub.</p>
+            </div>
         </div>
     </div>
 
     <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4">
-        <div class="glass w-full max-w-md p-8 rounded-3xl">
-            <div class="flex justify-between mb-6">
-                <h2 class="text-xl font-bold">Upload to GitHub</h2>
-                <button onclick="toggleModal()"><i data-lucide="x"></i></button>
-            </div>
-            <input type="file" id="fileInput" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500/10 file:text-blue-400 hover:file:bg-blue-500/20 mb-6">
-            <button id="uploadBtn" class="w-full gradient-btn py-3 rounded-2xl font-bold text-black">Start Upload</button>
-            <p id="status" class="mt-4 text-center text-sm"></p>
+    <div id="modal" class="fixed inset-0 bg-slate-950/90 hidden z-50 flex items-center justify-center p-6 backdrop-blur-md">
+        <div class="glass max-w-md w-full p-10 rounded-[3rem] relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-extrabold mb-2">Sync New Data</h2>
+            <p class="text-gray-500 text-sm mb-8">Select IEEE paper, PPT, or SRS for the team.</p>
+            
+            <input type="file" id="fileInput" class="block w-full text-sm text-slate-400 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:bg-blue-600 file:text-white file:font-bold hover:file:bg-blue-500 transition cursor-pointer mb-6">
+            
+            <button id="uploadBtn" class="w-full bg-white text-black py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 transition-all shadow-xl">Push to GitHub</button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        function toggleModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
+        const fileList = document.getElementById('fileList');
+        const modal = document.getElementById('modal');
+
+        const openModal = () => modal.classList.remove('hidden');
+        const closeModal = () => modal.classList.add('hidden');
+
+        async function fetchFiles() {
+            try {
+                const res = await fetch('/api/manage');
+                const files = await res.json();
+                fileList.innerHTML = '';
+                
+                if (!files.length) {
+                    fileList.innerHTML = `<div class="text-center py-10 text-gray-600">No files in shared directory.</div>`;
+                    return;
+                }
+
+                files.forEach(file => {
+                    const card = document.createElement('div');
+                    card.className = "flex items-center justify-between p-5 glass rounded-2xl hover:bg-white/5 transition-all group";
+                    card.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-blue-500/10 rounded-xl group-hover:bg-blue-500/20 transition"><i data-lucide="file-code-2" class="text-blue-400 w-5 h-5"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm">${file.name}</h4>
+                                <p class="text-[10px] text-gray-500 uppercase">${(file.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="${file.download_url}" target="_blank" class="p-2 hover:bg-white/10 rounded-lg transition"><i data-lucide="download" class="w-4 h-4"></i></a>
+                            <button onclick="deleteFile('${file.name}', '${file.sha}')" class="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    `;
+                    fileList.appendChild(card);
+                });
+                lucide.createIcons();
+            } catch (err) { console.error("Sync Error", err); }
+        }
 
         document.getElementById('uploadBtn').addEventListener('click', async () => {
-            const fileInput = document.getElementById('fileInput');
-            const status = document.getElementById('status');
-            if (!fileInput.files[0]) return alert("Select a file first!");
-
-            const file = fileInput.files[0];
+            const input = document.getElementById('fileInput');
+            if (!input.files[0]) return;
+            
+            const file = input.files[0];
+            const btn = document.getElementById('uploadBtn');
             const reader = new FileReader();
             
-            status.innerText = "Processing...";
-            
+            btn.innerText = "Syncing...";
+            btn.disabled = true;
+
             reader.onload = async (e) => {
-                const base64Content = e.target.result.split(',')[1];
-                const response = await fetch('/api/upload', {
+                const content = e.target.result.split(',')[1];
+                const res = await fetch('/api/manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fileName: file.name,
-                        content: base64Content
-                    })
+                    body: JSON.stringify({ fileName: file.name, content })
                 });
-
-                if (response.ok) {
-                    status.innerText = "✅ Successfully added to GitHub!";
-                    setTimeout(() => location.reload(), 2000);
-                } else {
-                    status.innerText = "❌ Upload failed.";
-                }
+                if (res.ok) { location.reload(); }
+                else { alert("Upload Failed"); btn.innerText = "Push to GitHub"; btn.disabled = false; }
             };
             reader.readAsDataURL(file);
         });
+
+        async function deleteFile(file, sha) {
+            if (!confirm(`Permanently delete ${file}?`)) return;
+            const res = await fetch(`/api/manage?file=${file}&sha=${sha}`, { method: 'DELETE' });
+            if (res.ok) fetchFiles();
+        }
+
+        fetchFiles();
     </script>
 </body>
 </html>
