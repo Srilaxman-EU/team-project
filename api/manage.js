@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const token = process.env.GH_TOKEN;
-    const owner = 'YOUR_GITHUB_USERNAME'; // REPLACE
-    const repo = 'YOUR_REPO_NAME';       // REPLACE
+    const owner = 'Srilaxman-EU'; // REPLACE
+    const repo = 'team-project';       // REPLACE
     const path = 'files';
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
@@ -40,3 +40,4 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: r.ok });
     }
 }
+
