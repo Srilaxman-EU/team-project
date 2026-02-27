@@ -2,129 +2,133 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Project | CauseRuDi Hub</title>
+    <title>Team Project Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; z-index: 50; width: 140px; }
-        .dropdown-menu.active { display: block; }
-        .gradient-text { background: linear-gradient(to right, #60a5fa, #2dd4bf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .dropdown { display: none; position: absolute; right: 0; top: 100%; z-index: 100; width: 160px; }
+        .dropdown.active { display: block; }
+        .file-row { transition: 0.2s; cursor: pointer; user-select: none; }
+        .file-row:hover { background: rgba(255, 255, 255, 0.08); }
     </style>
 </head>
-<body class="p-6 md:p-12 min-h-screen">
-    <nav class="flex justify-between items-center mb-12">
-        <div>
-            <h1 class="text-3xl font-black italic tracking-tighter uppercase">TEAM <span class="gradient-text">PROJECT</span></h1>
-            <p class="text-[10px] tracking-[0.3em] text-gray-500 font-bold">RESOURCE HUB</p>
-        </div>
-        <button onclick="document.getElementById('m').classList.remove('hidden')" class="bg-blue-600 px-6 py-2.5 rounded-xl font-bold hover:scale-105 transition shadow-lg shadow-blue-500/20">+ Add New</button>
+<body class="p-4 md:p-12 min-h-screen">
+    <nav class="flex justify-between items-center mb-10">
+        <h1 class="text-2xl font-extrabold tracking-tighter uppercase">Team <span class="text-blue-500">Project</span></h1>
+        <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">+ Upload</button>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Explorer -->
-        <div class="lg:col-span-2 glass rounded-[2.5rem] p-8">
-            <h2 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="folder-kanban" class="text-blue-400"></i> Project Files</h2>
-            <div id="fileList" class="space-y-3">
-                <p class="text-gray-500 animate-pulse">Syncing with GitHub...</p>
+        <!-- File Explorer -->
+        <div class="lg:col-span-2 glass rounded-[2rem] p-6">
+            <h2 class="text-lg font-bold mb-4 opacity-70">Double-click a file to view it</h2>
+            <div id="fileList" class="space-y-2">
+                <p class="text-gray-500">Syncing repository...</p>
             </div>
         </div>
 
-        <!-- Details -->
-        <div class="glass rounded-[2.5rem] p-8 h-fit">
-            <h3 class="text-gray-500 text-xs font-bold mb-4 uppercase tracking-widest">Workspace Status</h3>
-            <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-sm text-gray-400 mb-2">Use the <b class="text-white">Modify</b> option in the 3-dot menu to replace an existing file with a newer version.</p>
-                <div class="flex items-center gap-2 text-xs text-green-400"><span class="w-2 h-2 bg-green-400 rounded-full animate-ping"></span> Live GitHub Sync</div>
-            </div>
+        <!-- Help Sidebar -->
+        <div class="glass rounded-[2rem] p-6 h-fit">
+            <h3 class="font-bold mb-4">Quick Guide</h3>
+            <ul class="text-sm text-gray-400 space-y-3">
+                <li class="flex items-center gap-2"><i data-lucide="mouse-pointer-2" class="w-4"></i> Double-click to open file</li>
+                <li class="flex items-center gap-2"><i data-lucide="edit-3" class="w-4"></i> "Modify" replaces existing file</li>
+                <li class="flex items-center gap-2"><i data-lucide="trash-2" class="w-4"></i> "Delete" is permanent</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Upload/Modify Modal -->
-    <div id="m" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50 backdrop-blur-md">
-        <div class="glass p-10 rounded-[2.5rem] max-w-sm w-full relative">
-            <button onclick="document.getElementById('m').classList.add('hidden')" class="absolute top-8 right-8 text-gray-400"><i data-lucide="x"></i></button>
-            <h2 id="modalTitle" class="text-2xl font-bold mb-6">Upload File</h2>
-            <input type="file" id="fi" class="block w-full text-sm text-gray-400 file:bg-blue-600 file:text-white file:px-6 file:py-2.5 file:rounded-xl file:border-0 mb-8">
-            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase tracking-widest hover:bg-blue-400 transition">Push to Cloud</button>
+    <!-- Upload Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[200] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="glass w-full max-w-sm p-8 rounded-[2rem] relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+            <h2 id="mTitle" class="text-xl font-bold mb-6">Sync New Resource</h2>
+            <input type="file" id="fi" class="block w-full text-sm text-gray-400 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-lg file:border-0 mb-6">
+            <button id="ub" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:bg-blue-400 transition">Push to GitHub</button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        let currentFiles = [];
+        let filesData = [];
 
-        async function load() {
+        async function fetchFiles() {
             try {
                 const r = await fetch('/api/manage');
-                currentFiles = await r.json();
+                filesData = await r.json();
                 const list = document.getElementById('fileList');
-                list.innerHTML = currentFiles.length ? '' : 'Vault is empty.';
-                
-                currentFiles.forEach((f, i) => {
-                    if(f.name === '.gitkeep') return;
+                list.innerHTML = filesData.length ? '' : '<div class="text-center py-10 opacity-30">Folder is empty</div>';
+
+                filesData.forEach((f, i) => {
+                    if (f.name === '.gitkeep') return;
                     const div = document.createElement('div');
-                    div.className = "flex justify-between items-center p-5 glass rounded-2xl border border-white/5 relative group";
+                    div.className = "file-row flex justify-between items-center p-4 glass rounded-xl border-transparent border relative";
+                    // Double click listener added here
+                    div.ondblclick = () => window.open(f.download_url, '_blank');
+                    
                     div.innerHTML = `
                         <div class="flex items-center gap-4">
-                            <div class="p-3 bg-blue-500/10 rounded-xl"><i data-lucide="file-text" class="text-blue-400 w-5 h-5"></i></div>
-                            <div><p class="text-sm font-bold">${f.name}</p><p class="text-[10px] text-gray-500 uppercase">${(f.size/1024).toFixed(1)} KB</p></div>
+                            <i data-lucide="file-text" class="text-blue-400 w-5 h-5"></i>
+                            <span class="text-sm font-semibold truncate max-w-[150px] md:max-w-xs">${f.name}</span>
                         </div>
                         <div class="relative">
-                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg transition"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
-                            <div id="menu-${i}" class="dropdown-menu glass p-2 rounded-xl border border-white/10 shadow-2xl">
-                                <button onclick="window.open('${f.download_url}')" class="w-full text-left px-3 py-2 text-xs hover:bg-blue-500/20 rounded-lg flex items-center gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
-                                <button onclick="triggerModify()" class="w-full text-left px-3 py-2 text-xs hover:bg-yellow-500/20 rounded-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
-                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left px-3 py-2 text-xs hover:bg-red-500/20 text-red-400 rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
+                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="more-vertical" class="w-5"></i></button>
+                            <div id="menu-${i}" class="dropdown glass p-2 rounded-xl shadow-2xl border-white/20">
+                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-blue-500/20 rounded-lg flex gap-2"><i data-lucide="download" class="w-3"></i> Open/Download</button>
+                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs hover:bg-yellow-500/20 rounded-lg flex gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
+                                <button onclick="deleteAction('${f.name}', '${f.sha}')" class="w-full text-left p-2 text-xs hover:bg-red-500/20 text-red-400 rounded-lg flex gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
                             </div>
                         </div>`;
                     list.appendChild(div);
                 });
                 lucide.createIcons();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Sync Error", e); }
         }
 
         function toggleMenu(e, id) {
             e.stopPropagation();
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.id !== `menu-${id}` && m.classList.remove('active'));
+            document.querySelectorAll('.dropdown').forEach(m => m.id !== `menu-${id}` && m.classList.remove('active'));
             document.getElementById(`menu-${id}`).classList.toggle('active');
         }
 
-        window.onclick = () => document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('active'));
+        window.onclick = () => document.querySelectorAll('.dropdown').forEach(m => m.classList.remove('active'));
 
-        function triggerModify() {
-            document.getElementById('modalTitle').innerText = "Modify / Update File";
-            document.getElementById('m').classList.remove('hidden');
+        function openModal(mode = 'Upload') {
+            document.getElementById('mTitle').innerText = mode === 'Modify' ? 'Update Existing File' : 'Sync New Resource';
+            document.getElementById('modal').classList.remove('hidden');
         }
 
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
         document.getElementById('ub').onclick = async () => {
-            const f = document.getElementById('fi').files[0];
-            if(!f) return;
-            const b = document.getElementById('ub');
-            b.innerText = "Processing..."; b.disabled = true;
+            const file = document.getElementById('fi').files[0];
+            if (!file) return;
+            const btn = document.getElementById('ub');
+            btn.innerText = "Processing..."; btn.disabled = true;
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const content = e.target.result.split(',')[1];
-                await fetch('/api/manage', {
+                const res = await fetch('/api/manage', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ fileName: f.name, content })
+                    body: JSON.stringify({ fileName: file.name, content })
                 });
-                location.reload();
+                if (res.ok) location.reload(); else alert("Error uploading file.");
             };
-            reader.readAsDataURL(f);
+            reader.readAsDataURL(file);
         };
 
-        async function del(n, s) {
-            if(confirm(`Delete ${n}?`)) {
-                await fetch(`/api/manage?file=${n}&sha=${s}`, { method: 'DELETE' });
-                load();
-            }
+        async function deleteAction(name, sha) {
+            if (!confirm(`Delete ${name} forever?`)) return;
+            const res = await fetch(`/api/manage?file=${name}&sha=${sha}`, { method: 'DELETE' });
+            if (res.ok) fetchFiles(); else alert("Delete failed. Check GitHub Token permissions.");
         }
-        load();
+
+        fetchFiles();
     </script>
 </body>
 </html>
