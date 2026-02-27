@@ -1,53 +1,42 @@
 export default async function handler(req, res) {
-    const GITHUB_TOKEN = process.env.GH_TOKEN;
-    const REPO_OWNER = 'YOUR_GITHUB_USERNAME'; // REPLACE THIS
-    const REPO_NAME = 'YOUR_REPO_NAME';       // REPLACE THIS
-    const FOLDER_PATH = 'files';
-    const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FOLDER_PATH}`;
+    const token = process.env.GH_TOKEN;
+    const owner = 'YOUR_GITHUB_USERNAME'; // REPLACE
+    const repo = 'YOUR_REPO_NAME';       // REPLACE
+    const path = 'files';
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
-    // 1. LIST FILES (GET)
+    const headers = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
+
     if (req.method === 'GET') {
-        const response = await fetch(API_URL, {
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-        });
-        const data = await response.json();
-        return res.status(200).json(Array.isArray(data) ? data : []);
+        const r = await fetch(url, { headers });
+        const d = await r.json();
+        return res.status(200).json(Array.isArray(d) ? d : []);
     }
 
-    // 2. UPLOAD & UPDATE (POST)
     if (req.method === 'POST') {
         const { fileName, content } = req.body;
-        
-        // Overwrite logic: Check if file exists to get its SHA
-        const check = await fetch(`${API_URL}/${fileName}`, {
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-        });
-        const existingFile = await check.json();
-        const sha = existingFile.sha || null;
-
-        const response = await fetch(`${API_URL}/${fileName}`, {
+        // Check if exists to get SHA for update
+        const check = await fetch(`${url}/${fileName}`, { headers });
+        const existing = await check.json();
+        const r = await fetch(`${url}/${fileName}`, {
             method: 'PUT',
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: `Mani Team Sync: ${fileName}`,
-                content: content,
-                sha: sha // Including SHA makes GitHub overwrite the file
+            headers,
+            body: JSON.stringify({ 
+                message: `Team Project Update: ${fileName}`, 
+                content, 
+                sha: existing.sha || null 
             })
         });
-        return res.status(response.ok ? 200 : 500).json({ success: response.ok });
+        return res.status(200).json({ ok: r.ok });
     }
 
-    // 3. DELETE (DELETE)
     if (req.method === 'DELETE') {
         const { file, sha } = req.query;
-        const response = await fetch(`${API_URL}/${file}`, {
+        const r = await fetch(`${url}/${file}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: `Mani Team Delete: ${file}`,
-                sha: sha
-            })
+            headers,
+            body: JSON.stringify({ message: `Team Project Delete: ${file}`, sha })
         });
-        return res.status(response.ok ? 200 : 500).json({ success: response.ok });
+        return res.status(200).json({ ok: r.ok });
     }
 }
