@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const token = process.env.GH_TOKEN;
-    const owner = 'Your_GitHub_Username'; 
-    const repo = 'Your_Repo_Name'; 
+    const owner = 'Srilaxman-EU'; 
+    const repo = 'team-project'; 
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/files`;
     const headers = { 
         Authorization: `token ${token}`, 
@@ -44,3 +44,4 @@ export default async function handler(req, res) {
         return res.status(r.ok ? 200 : 500).json({ ok: r.ok });
     }
 }
+
