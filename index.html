@@ -8,11 +8,11 @@
     <style>
         body { font-family: sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .file-row { position: relative; z-index: 10; transition: background 0.2s; }
+        .file-row { position: relative; z-index: 10; }
         .file-row.active-row { z-index: 100 !important; }
-        .dropdown { display: none; position: absolute; right: 10px; top: 45px; z-index: 1000; width: 160px; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .dropdown { display: none; position: absolute; right: 10px; top: 45px; z-index: 1000; width: 160px; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; }
         .dropdown.active { display: block; }
-        .toast { transform: translateY(100px); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 9999; }
+        .toast { transform: translateY(100px); transition: 0.4s; z-index: 9999; }
         .toast.show { transform: translateY(0); }
     </style>
 </head>
@@ -32,20 +32,18 @@
             <h1 class="text-2xl font-black italic">TEAM PROJECT</h1>
             <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">+ Upload</button>
         </nav>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 glass rounded-[2rem] p-8">
-                <div id="fileList" class="space-y-4"></div>
-            </div>
+        <div class="lg:col-span-2 glass rounded-[2rem] p-8">
+            <div id="fileList" class="space-y-4"></div>
         </div>
     </div>
 
     <!-- MODAL -->
-    <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[5000] flex items-center justify-center p-4 backdrop-blur-md">
+    <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[5000] flex items-center justify-center p-4">
         <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] relative">
             <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-lucide="x"></i></button>
             <h2 class="text-xl font-bold mb-6">Push to GitHub</h2>
-            <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl file:border-0">
-            <button id="ub" onclick="handleUpload()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest">Push to Cloud</button>
+            <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl">
+            <button id="ub" onclick="handleUpload()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase">Push to Cloud</button>
         </div>
     </div>
 
@@ -71,31 +69,33 @@
             document.getElementById('tIcon').innerHTML = type === 'success' ? '<i data-lucide="check" class="text-green-400"></i>' : '<i data-lucide="x-circle" class="text-red-400"></i>';
             lucide.createIcons();
             t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 4000);
+            setTimeout(() => t.classList.remove('show'), 5000);
         }
 
         async function fetchFiles() {
-            const res = await fetch('/api/manage');
-            const files = await res.json();
-            const list = document.getElementById('fileList');
-            list.innerHTML = files.length ? '' : 'No files found.';
-            files.forEach((f, i) => {
-                if(f.name === '.gitkeep') return;
-                const row = document.createElement('div');
-                row.id = `row-${i}`; row.className = "file-row flex justify-between items-center p-5 glass rounded-2xl";
-                row.innerHTML = `
-                    <span class="text-sm font-semibold">${f.name}</span>
-                    <div class="relative">
-                        <button onclick="toggleMenu(event, ${i})" class="p-2"><i data-lucide="more-vertical"></i></button>
-                        <div id="menu-${i}" class="dropdown p-2">
-                            <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
-                            <button onclick="openModal()" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
-                            <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs text-red-400 hover:bg-white/10 rounded flex gap-2"><i data-lucide="trash" class="w-3"></i> Delete</button>
-                        </div>
-                    </div>`;
-                list.appendChild(row);
-            });
-            lucide.createIcons();
+            try {
+                const res = await fetch('/api/manage');
+                const files = await res.json();
+                const list = document.getElementById('fileList');
+                list.innerHTML = files.length ? '' : 'No files found.';
+                files.forEach((f, i) => {
+                    if(f.name === '.gitkeep') return;
+                    const row = document.createElement('div');
+                    row.id = `row-${i}`; row.className = "file-row flex justify-between items-center p-5 glass rounded-2xl";
+                    row.innerHTML = `
+                        <span class="text-sm font-semibold">${f.name}</span>
+                        <div class="relative">
+                            <button onclick="toggleMenu(event, ${i})" class="p-2"><i data-lucide="more-vertical"></i></button>
+                            <div id="menu-${i}" class="dropdown p-2">
+                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
+                                <button onclick="openModal()" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
+                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs text-red-400 hover:bg-white/10 rounded flex gap-2"><i data-lucide="trash" class="w-3"></i> Delete</button>
+                            </div>
+                        </div>`;
+                    list.appendChild(row);
+                });
+                lucide.createIcons();
+            } catch(e) { showToast("Network Error: Could not reach API", "error"); }
         }
 
         function toggleMenu(e, id) {
@@ -112,23 +112,35 @@
         async function handleUpload() {
             const file = document.getElementById('fi').files[0];
             if(!file) return;
+
+            // Vercel Limit Check
+            if (file.size > 4.5 * 1024 * 1024) {
+                return showToast("File too large! Max 4.5MB", "error");
+            }
+
             const btn = document.getElementById('ub');
             btn.innerText = "Uploading..."; btn.disabled = true;
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const content = e.target.result.split(',')[1];
-                const res = await fetch('/api/manage', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ fileName: file.name, content })
-                });
-                if(res.ok) {
-                    showToast("Uploaded Successfully!", "success");
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    const errData = await res.json();
-                    showToast(`Failed: ${errData.message}`, "error");
+                try {
+                    const res = await fetch('/api/manage', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ fileName: file.name, content })
+                    });
+                    
+                    const data = await res.json();
+                    if(res.ok) {
+                        showToast("Success!", "success");
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast(`Error: ${data.message}`, "error");
+                        btn.innerText = "Push to Cloud"; btn.disabled = false;
+                    }
+                } catch (err) {
+                    showToast("Server Timeout: File might be too large", "error");
                     btn.innerText = "Push to Cloud"; btn.disabled = false;
                 }
             };
