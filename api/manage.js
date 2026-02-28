@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
     const token = process.env.GH_TOKEN;
     const owner = 'Srilaxman-EU'; // <--- Double check this!
-    const repo = 'team=project';        // <--- Double check this!
+    const repo = 'team-project';        // <--- Double check this!
     const path = 'files';
     const baseUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
@@ -75,3 +75,4 @@ export default async function handler(req, res) {
         }
     }
 }
+
