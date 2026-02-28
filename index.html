@@ -10,8 +10,8 @@
         body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
         
-        /* THE FIX: Absolute positioning inside relative row with high Z-index on active */
-        .file-row { position: relative; transition: background 0.2s; }
+        /* FIX: Stacking Context - Active row jumps to front so menu is never hidden */
+        .file-row { position: relative; transition: background 0.2s; z-index: 10; }
         .file-row.active-row { z-index: 100 !important; }
         
         .dropdown { 
@@ -37,17 +37,18 @@
     <!-- LOGIN SCREEN -->
     <div id="auth" class="fixed inset-0 flex items-center justify-center z-[9000] bg-[#020617] p-6">
         <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black italic mb-6 uppercase tracking-tighter">Team <span class="text-blue-500">Project</span></h1>
-            <input type="password" id="pw" placeholder="Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center outline-none focus:border-blue-500">
-            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold hover:bg-blue-500">Enter Vault</button>
+            <h1 class="text-3xl font-black italic mb-6 uppercase tracking-tighter text-white">Team <span class="text-blue-500">Project</span></h1>
+            <!-- Added onkeydown to trigger login on Enter key -->
+            <input type="password" id="pw" onkeydown="if(event.key === 'Enter') login()" placeholder="Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center outline-none focus:border-blue-500 text-white">
+            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold hover:bg-blue-500 text-white transition-all">Enter Vault</button>
         </div>
     </div>
 
     <!-- MAIN APP -->
     <div id="app" class="hidden min-h-screen flex flex-col p-6 md:p-12">
         <nav class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-black italic uppercase">TEAM <span class="text-blue-500">PROJECT</span></h1>
-            <button onclick="openModal('Upload')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">+ Upload</button>
+            <h1 class="text-2xl font-black italic uppercase text-white">TEAM <span class="text-blue-500">PROJECT</span></h1>
+            <button onclick="openModal('Upload')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 transition-all">+ Upload</button>
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -61,8 +62,8 @@
 
             <!-- Sidebar -->
             <div class="glass rounded-[2rem] p-8 h-fit">
-                <h3 class="font-bold mb-4">Portal Guidelines</h3>
-                <p class="text-sm text-gray-400">Select the 3-dot menu to download, modify, or delete. "Modify" allows you to replace the file with a newer version.</p>
+                <h3 class="font-bold mb-4 text-white">Portal Guidelines</h3>
+                <p class="text-sm text-gray-400">Use the 3-dot menu to manage files. <br><br><b>Modify:</b> Replaces an existing file with a newer version. <br><b>Delete:</b> Permanently removes from GitHub.</p>
             </div>
         </div>
     </div>
@@ -70,28 +71,32 @@
     <!-- MODAL -->
     <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[5000] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] relative">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-lucide="x"></i></button>
-            <h2 id="mTitle" class="text-xl font-bold mb-6">Upload File</h2>
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
+            <h2 id="mTitle" class="text-xl font-bold mb-6 text-white">Upload File</h2>
             <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl file:border-0 cursor-pointer">
-            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest">Push to GitHub</button>
+            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-blue-400 transition-all">Push to GitHub</button>
         </div>
     </div>
 
     <!-- TOAST POPUP -->
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-2xl flex items-center gap-4 toast">
-        <div id="tIcon"></div><p id="tMsg" class="font-bold text-sm"></p>
+        <div id="tIcon"></div><p id="tMsg" class="font-bold text-sm text-white"></p>
     </div>
 
     <script>
         lucide.createIcons();
-        const PASS = "1234"; 
+        const PASS = "1234"; // Default Password
 
         function login() {
-            if(document.getElementById('pw').value === PASS) {
+            const input = document.getElementById('pw');
+            if(input.value === PASS) {
                 document.getElementById('auth').style.display = 'none';
                 document.getElementById('app').classList.remove('hidden');
                 fetchFiles();
-            } else { showToast("Invalid Password", "error"); }
+            } else { 
+                showToast("Invalid Password", "error"); 
+                input.value = ""; // Clear input on fail
+            }
         }
 
         function showToast(msg, type) {
@@ -108,7 +113,7 @@
                 const res = await fetch('/api/manage');
                 const files = await res.json();
                 const list = document.getElementById('fileList');
-                list.innerHTML = files.length ? '' : '<p class="text-center py-10 opacity-40 italic">No files found in /files</p>';
+                list.innerHTML = files.length ? '' : '<p class="text-center py-10 opacity-40 italic">No files found.</p>';
                 
                 files.forEach((f, i) => {
                     if(f.name === '.gitkeep') return;
@@ -119,16 +124,16 @@
                     row.innerHTML = `
                         <div class="flex items-center gap-4">
                             <i data-lucide="file-text" class="text-blue-400 w-5 h-5"></i>
-                            <span class="text-sm font-semibold truncate max-w-[200px]">${f.name}</span>
+                            <span class="text-sm font-semibold truncate max-w-[200px] text-white">${f.name}</span>
                         </div>
-                        <div class="relative">
-                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg transition">
+                        <div class="relative overflow-visible">
+                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg transition text-white">
                                 <i data-lucide="more-vertical" class="w-5 h-5"></i>
                             </button>
                             <div id="menu-${i}" class="dropdown p-2">
-                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-blue-500/20 rounded-lg flex items-center gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
-                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs hover:bg-yellow-500/20 rounded-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
-                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs hover:bg-red-500/20 text-red-400 rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
+                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs text-white hover:bg-blue-500/20 rounded-lg flex items-center gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
+                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs text-white hover:bg-yellow-500/20 rounded-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
+                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs text-red-400 hover:bg-red-500/20 rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
                             </div>
                         </div>`;
                     list.appendChild(row);
@@ -152,7 +157,7 @@
 
             if (!isActive) {
                 targetMenu.classList.add('active');
-                targetRow.classList.add('active-row'); // Jumps to front
+                targetRow.classList.add('active-row'); // Brings row to front
             }
         }
 
