@@ -6,64 +6,35 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
+        body { font-family: sans-serif; background: #020617; color: #f8fafc; overflow-x: hidden; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        
-        /* FIX: Stacking Context - Active row jumps to front so menu is never hidden */
-        .file-row { position: relative; transition: background 0.2s; z-index: 10; }
+        .file-row { position: relative; z-index: 10; transition: background 0.2s; }
         .file-row.active-row { z-index: 100 !important; }
-        
-        .dropdown { 
-            display: none; 
-            position: absolute; 
-            right: 10px; 
-            top: 45px; 
-            z-index: 1000; 
-            width: 160px; 
-            background: #1e293b; 
-            border: 1px solid rgba(255,255,255,0.2); 
-            border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-        }
+        .dropdown { display: none; position: absolute; right: 10px; top: 45px; z-index: 1000; width: 160px; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .dropdown.active { display: block; }
-        
         .toast { transform: translateY(100px); transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 9999; }
         .toast.show { transform: translateY(0); }
     </style>
 </head>
 <body>
-
-    <!-- LOGIN SCREEN -->
-    <div id="auth" class="fixed inset-0 flex items-center justify-center z-[9000] bg-[#020617] p-6">
+    <!-- LOGIN -->
+    <div id="auth" class="fixed inset-0 flex items-center justify-center z-[9000] bg-[#020617]">
         <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black italic mb-6 uppercase tracking-tighter text-white">Team <span class="text-blue-500">Project</span></h1>
-            <!-- Added onkeydown to trigger login on Enter key -->
-            <input type="password" id="pw" onkeydown="if(event.key === 'Enter') login()" placeholder="Access Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center outline-none focus:border-blue-500 text-white">
-            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold hover:bg-blue-500 text-white transition-all">Enter Vault</button>
+            <h1 class="text-3xl font-black italic mb-6">TEAM <span class="text-blue-500">PROJECT</span></h1>
+            <input type="password" id="pw" onkeydown="if(event.key==='Enter')login()" placeholder="Password" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl mb-4 text-center outline-none focus:border-blue-500">
+            <button onclick="login()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold">Enter Vault</button>
         </div>
     </div>
 
-    <!-- MAIN APP -->
-    <div id="app" class="hidden min-h-screen flex flex-col p-6 md:p-12">
+    <!-- APP -->
+    <div id="app" class="hidden min-h-screen p-6 md:p-12">
         <nav class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-black italic uppercase text-white">TEAM <span class="text-blue-500">PROJECT</span></h1>
-            <button onclick="openModal('Upload')" class="bg-blue-600 px-6 py-2 rounded-xl font-bold hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 transition-all">+ Upload</button>
+            <h1 class="text-2xl font-black italic">TEAM PROJECT</h1>
+            <button onclick="openModal()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold">+ Upload</button>
         </nav>
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- File Explorer -->
             <div class="lg:col-span-2 glass rounded-[2rem] p-8">
-                <h2 class="text-gray-500 text-xs font-bold uppercase mb-6 tracking-widest">Shared Resources</h2>
-                <div id="fileList" class="space-y-4">
-                    <!-- Files injected here -->
-                </div>
-            </div>
-
-            <!-- Sidebar -->
-            <div class="glass rounded-[2rem] p-8 h-fit">
-                <h3 class="font-bold mb-4 text-white">Portal Guidelines</h3>
-                <p class="text-sm text-gray-400">Use the 3-dot menu to manage files. <br><br><b>Modify:</b> Replaces an existing file with a newer version. <br><b>Delete:</b> Permanently removes from GitHub.</p>
+                <div id="fileList" class="space-y-4"></div>
             </div>
         </div>
     </div>
@@ -71,141 +42,108 @@
     <!-- MODAL -->
     <div id="modal" class="fixed inset-0 bg-black/90 hidden z-[5000] flex items-center justify-center p-4 backdrop-blur-md">
         <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] relative">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
-            <h2 id="mTitle" class="text-xl font-bold mb-6 text-white">Upload File</h2>
-            <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl file:border-0 cursor-pointer">
-            <button id="ub" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-blue-400 transition-all">Push to GitHub</button>
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500"><i data-lucide="x"></i></button>
+            <h2 class="text-xl font-bold mb-6">Push to GitHub</h2>
+            <input type="file" id="fi" class="block w-full text-sm text-gray-400 mb-8 file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded-xl file:border-0">
+            <button id="ub" onclick="handleUpload()" class="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest">Push to Cloud</button>
         </div>
     </div>
 
-    <!-- TOAST POPUP -->
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass px-8 py-4 rounded-2xl flex items-center gap-4 toast">
-        <div id="tIcon"></div><p id="tMsg" class="font-bold text-sm text-white"></p>
+        <div id="tIcon"></div><p id="tMsg" class="font-bold text-sm"></p>
     </div>
 
     <script>
         lucide.createIcons();
-        const PASS = "1234"; // Default Password
+        const PASS = "1234";
 
         function login() {
-            const input = document.getElementById('pw');
-            if(input.value === PASS) {
-                document.getElementById('auth').style.display = 'none';
+            if(document.getElementById('pw').value === PASS) {
+                document.getElementById('auth').style.display='none';
                 document.getElementById('app').classList.remove('hidden');
                 fetchFiles();
-            } else { 
-                showToast("Invalid Password", "error"); 
-                input.value = ""; // Clear input on fail
-            }
+            } else showToast("Wrong Password", "error");
         }
 
         function showToast(msg, type) {
             const t = document.getElementById('toast');
             document.getElementById('tMsg').innerText = msg;
-            document.getElementById('tIcon').innerHTML = type === 'success' ? '<i data-lucide="check" class="text-green-400"></i>' : '<i data-lucide="alert-circle" class="text-red-400"></i>';
+            document.getElementById('tIcon').innerHTML = type === 'success' ? '<i data-lucide="check" class="text-green-400"></i>' : '<i data-lucide="x-circle" class="text-red-400"></i>';
             lucide.createIcons();
             t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            setTimeout(() => t.classList.remove('show'), 4000);
         }
 
         async function fetchFiles() {
-            try {
-                const res = await fetch('/api/manage');
-                const files = await res.json();
-                const list = document.getElementById('fileList');
-                list.innerHTML = files.length ? '' : '<p class="text-center py-10 opacity-40 italic">No files found.</p>';
-                
-                files.forEach((f, i) => {
-                    if(f.name === '.gitkeep') return;
-                    const row = document.createElement('div');
-                    row.id = `row-${i}`;
-                    row.className = "file-row flex justify-between items-center p-5 glass rounded-2xl hover:bg-white/5";
-                    
-                    row.innerHTML = `
-                        <div class="flex items-center gap-4">
-                            <i data-lucide="file-text" class="text-blue-400 w-5 h-5"></i>
-                            <span class="text-sm font-semibold truncate max-w-[200px] text-white">${f.name}</span>
+            const res = await fetch('/api/manage');
+            const files = await res.json();
+            const list = document.getElementById('fileList');
+            list.innerHTML = files.length ? '' : 'No files found.';
+            files.forEach((f, i) => {
+                if(f.name === '.gitkeep') return;
+                const row = document.createElement('div');
+                row.id = `row-${i}`; row.className = "file-row flex justify-between items-center p-5 glass rounded-2xl";
+                row.innerHTML = `
+                    <span class="text-sm font-semibold">${f.name}</span>
+                    <div class="relative">
+                        <button onclick="toggleMenu(event, ${i})" class="p-2"><i data-lucide="more-vertical"></i></button>
+                        <div id="menu-${i}" class="dropdown p-2">
+                            <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
+                            <button onclick="openModal()" class="w-full text-left p-2 text-xs hover:bg-white/10 rounded flex gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
+                            <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs text-red-400 hover:bg-white/10 rounded flex gap-2"><i data-lucide="trash" class="w-3"></i> Delete</button>
                         </div>
-                        <div class="relative overflow-visible">
-                            <button onclick="toggleMenu(event, ${i})" class="p-2 hover:bg-white/10 rounded-lg transition text-white">
-                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
-                            </button>
-                            <div id="menu-${i}" class="dropdown p-2">
-                                <button onclick="window.open('${f.download_url}')" class="w-full text-left p-2 text-xs text-white hover:bg-blue-500/20 rounded-lg flex items-center gap-2"><i data-lucide="download" class="w-3"></i> Download</button>
-                                <button onclick="openModal('Modify')" class="w-full text-left p-2 text-xs text-white hover:bg-yellow-500/20 rounded-lg flex items-center gap-2"><i data-lucide="edit-3" class="w-3"></i> Modify</button>
-                                <button onclick="del('${f.name}','${f.sha}')" class="w-full text-left p-2 text-xs text-red-400 hover:bg-red-500/20 rounded-lg flex items-center gap-2"><i data-lucide="trash-2" class="w-3"></i> Delete</button>
-                            </div>
-                        </div>`;
-                    list.appendChild(row);
-                });
-                lucide.createIcons();
-            } catch (e) { showToast("Sync Error", "error"); }
+                    </div>`;
+                list.appendChild(row);
+            });
+            lucide.createIcons();
         }
 
         function toggleMenu(e, id) {
             e.stopPropagation();
-            const menus = document.querySelectorAll('.dropdown');
-            const rows = document.querySelectorAll('.file-row');
-            const targetMenu = document.getElementById(`menu-${id}`);
-            const targetRow = document.getElementById(`row-${id}`);
-
-            const isActive = targetMenu.classList.contains('active');
-
-            // Close all
-            menus.forEach(m => m.classList.remove('active'));
-            rows.forEach(r => r.classList.remove('active-row'));
-
-            if (!isActive) {
-                targetMenu.classList.add('active');
-                targetRow.classList.add('active-row'); // Brings row to front
-            }
-        }
-
-        window.onclick = () => {
             document.querySelectorAll('.dropdown').forEach(m => m.classList.remove('active'));
             document.querySelectorAll('.file-row').forEach(r => r.classList.remove('active-row'));
-        };
-
-        function openModal(mode) { 
-            document.getElementById('mTitle').innerText = mode === 'Modify' ? 'Modify Resource' : 'Upload Resource';
-            document.getElementById('modal').classList.remove('hidden'); 
+            document.getElementById(`menu-${id}`).classList.add('active');
+            document.getElementById(`row-${id}`).classList.add('active-row');
         }
+
+        function openModal() { document.getElementById('modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
 
-        document.getElementById('ub').onclick = async () => {
-            const f = document.getElementById('fi').files[0];
-            if (!f) return showToast("Select a file first", "error");
-            document.getElementById('ub').innerText = "Syncing...";
-            
+        async function handleUpload() {
+            const file = document.getElementById('fi').files[0];
+            if(!file) return;
+            const btn = document.getElementById('ub');
+            btn.innerText = "Uploading..."; btn.disabled = true;
+
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const content = e.target.result.split(',')[1];
                 const res = await fetch('/api/manage', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ fileName: f.name, content })
+                    body: JSON.stringify({ fileName: file.name, content })
                 });
-                if (res.ok) { 
-                    showToast("Success: File Pushed", "success"); 
-                    setTimeout(() => location.reload(), 1200); 
-                } else { 
-                    const d = await res.json();
-                    showToast(`Error: ${d.message || "Failed"}`, "error");
-                    document.getElementById('ub').innerText = "Push to GitHub";
+                if(res.ok) {
+                    showToast("Uploaded Successfully!", "success");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    const errData = await res.json();
+                    showToast(`Failed: ${errData.message}`, "error");
+                    btn.innerText = "Push to Cloud"; btn.disabled = false;
                 }
             };
-            reader.readAsDataURL(f);
-        };
+            reader.readAsDataURL(file);
+        }
 
         async function del(n, s) {
-            if(!confirm(`Delete ${n} permanently?`)) return;
+            if(!confirm(`Delete ${n}?`)) return;
             const res = await fetch(`/api/manage?file=${n}&sha=${s}`, { method: 'DELETE' });
-            if(res.ok) { 
-                showToast("Deleted Successfully", "success"); 
-                fetchFiles(); 
-            } else {
-                showToast("Delete Failed", "error");
-            }
+            if(res.ok) { showToast("Deleted", "success"); fetchFiles(); }
+            else showToast("Delete failed", "error");
+        }
+        window.onclick = () => {
+            document.querySelectorAll('.dropdown').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.file-row').forEach(r => r.classList.remove('active-row'));
         }
     </script>
 </body>
