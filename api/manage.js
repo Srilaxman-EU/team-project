@@ -1,47 +1,62 @@
 export default async function handler(req, res) {
     const token = process.env.GH_TOKEN;
-    const owner = 'Srilaxman-EU'; 
-    const repo = 'team-project'; 
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/files`;
+    const owner = 'Srilaxman-EU'; // <--- CHANGE THIS
+    const repo = 'team-project';        // <--- CHANGE THIS
+    const path = 'files';
+    const baseUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+
     const headers = { 
-        Authorization: `token ${token}`, 
-        'User-Agent': 'Team-Project-Portal',
-        'Accept': 'application/vnd.github.v3+json'
+        'Authorization': `token ${token}`, 
+        'Content-Type': 'application/json',
+        'User-Agent': 'Team-Project-Portal'
     };
 
     if (req.method === 'GET') {
-        const r = await fetch(url, { headers });
+        const r = await fetch(baseUrl, { headers });
         const d = await r.json();
         return res.status(200).json(Array.isArray(d) ? d : []);
     }
 
     if (req.method === 'POST') {
         const { fileName, content } = req.body;
-        // Check for SHA to allow Updates
-        const check = await fetch(`${url}/${fileName}`, { headers });
-        const existing = await check.json();
-        const r = await fetch(`${url}/${fileName}`, {
+        
+        // 1. Check if file exists to get SHA (for updates)
+        let sha = undefined;
+        try {
+            const check = await fetch(`${baseUrl}/${fileName}`, { headers });
+            if (check.ok) {
+                const existing = await check.json();
+                sha = existing.sha;
+            }
+        } catch (e) { /* File doesn't exist, ignore */ }
+
+        // 2. Upload or Update
+        const response = await fetch(`${baseUrl}/${fileName}`, {
             method: 'PUT',
-            headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                message: 'Update via Portal', 
-                content, 
-                sha: existing.sha || undefined 
+            headers,
+            body: JSON.stringify({
+                message: `Portal Sync: ${fileName}`,
+                content: content,
+                sha: sha // If undefined, GitHub creates a new file
             })
         });
-        if (r.ok) return res.status(200).json({ ok: true });
-        const err = await r.json();
-        return res.status(500).json({ message: err.message });
+
+        const result = await response.json();
+        if (response.ok) {
+            return res.status(200).json({ ok: true });
+        } else {
+            // Return the actual GitHub error to the frontend for debugging
+            return res.status(response.status).json({ message: result.message });
+        }
     }
 
     if (req.method === 'DELETE') {
         const { file, sha } = req.query;
-        const r = await fetch(`${url}/${file}`, {
+        const r = await fetch(`${baseUrl}/${file}`, {
             method: 'DELETE',
-            headers: { ...headers, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Delete via Portal', sha })
+            headers,
+            body: JSON.stringify({ message: `Portal Delete: ${file}`, sha })
         });
         return res.status(r.ok ? 200 : 500).json({ ok: r.ok });
     }
 }
-
